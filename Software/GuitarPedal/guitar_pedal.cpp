@@ -17,8 +17,13 @@ using namespace bkshepherd;
 // #define VARIANT_1590B
 // #define VARIANT_1590B_SMD
 // #define VARIANT_TERRARIUM
+#define VARIANT_INTERNAL
 
-#if defined(VARIANT_TERRARIUM)
+#if defined(VARIANT_INTERNAL)
+#include "Hardware-Modules/guitar_pedal_internal.h"
+constexpr bool has_alternate_footswitch = true;
+GuitarPedalInternal hardware;
+#elif defined(VARIANT_TERRARIUM)
 #include "Hardware-Modules/guitar_pedal_terrarium.h"
 constexpr bool has_alternate_footswitch = true;
 GuitarPedalTerrarium hardware;

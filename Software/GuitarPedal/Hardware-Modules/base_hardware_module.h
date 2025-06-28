@@ -15,6 +15,11 @@ using namespace daisy;
  */
 using MyOledDisplay = OledDisplay<SSD130x4WireSpi128x64Driver>;
 
+/** Typedef the OledDisplay to make syntax cleaner below
+ *  This is a 2Wire I2C Transport controlling an 128x32 sized SSD1306
+ */
+using MyOledI2cDisplay = OledDisplay<SSD130xI2c128x32Driver>;
+
 namespace bkshepherd {
 
 /** Special Function Types */
@@ -182,6 +187,9 @@ class BaseHardwareModule {
     /** Checks to see if device hardware supports the Display*/
     bool SupportsDisplay();
 
+    /** Checks to see if device hardware supports the I2C Display*/
+    bool SupportsI2cDisplay();
+
     /** Checks to see if device hardware supports True Bypass*/
     bool SupportsTrueBypass();
 
@@ -194,6 +202,7 @@ class BaseHardwareModule {
 
     MidiUartHandler midi;
     MyOledDisplay display;
+    MyOledI2cDisplay displayI2c;
     GPIO audioBypassTrigger;
     GPIO audioMuteTrigger;
 
@@ -201,6 +210,7 @@ class BaseHardwareModule {
     bool m_supportsStereo;
     bool m_supportsMidi;
     bool m_supportsDisplay;
+    bool m_supportsI2cDisplay;
     bool m_supportsTrueBypass;
     bool m_audioBypass;
     bool m_audioMute;
@@ -215,6 +225,7 @@ class BaseHardwareModule {
     void InitLeds(int count, Pin pins[]);
     void InitMidi(Pin rxPin, Pin txPin);
     void InitDisplay(Pin dcPin, Pin resetPin);
+    void InitI2cDisplay(Pin sdaPin, Pin sclPin);
     void InitTrueBypass(Pin relayPin, Pin mutePin);
 
     inline uint16_t *adc_ptr(const uint8_t chn) { return seed.adc.GetPtr(chn); }

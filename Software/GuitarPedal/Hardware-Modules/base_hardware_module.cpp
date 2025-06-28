@@ -157,6 +157,8 @@ bool BaseHardwareModule::SupportsMidi() { return m_supportsMidi; }
 
 bool BaseHardwareModule::SupportsDisplay() { return m_supportsDisplay; }
 
+bool BaseHardwareModule::SupportsI2cDisplay() { return m_supportsI2cDisplay; }
+
 bool BaseHardwareModule::SupportsTrueBypass() { return m_supportsTrueBypass; }
 
 void BaseHardwareModule::InitKnobs(int count, Pin pins[]) {
@@ -219,6 +221,21 @@ void BaseHardwareModule::InitDisplay(Pin dcPin, Pin resetPin) {
     display.Init(disp_cfg);
 
     m_supportsDisplay = true;
+}
+
+void BaseHardwareModule::InitI2cDisplay(Pin sdaPin, Pin sclPin) {
+    // Configure the Display
+    MyOledI2cDisplay::Config disp_cfg;
+    disp_cfg.driver_config.transport_config.i2c_address               = 0x3C;
+    disp_cfg.driver_config.transport_config.i2c_config.periph         = I2CHandle::Config::Peripheral::I2C_1;
+    // disp_cfg.driver_config.transport_config.i2c_config.speed          = I2CHandle::Config::Speed::I2C_100KHZ;
+    disp_cfg.driver_config.transport_config.i2c_config.mode           = I2CHandle::Config::Mode::I2C_MASTER;
+    disp_cfg.driver_config.transport_config.i2c_config.pin_config.sda = sdaPin;
+    disp_cfg.driver_config.transport_config.i2c_config.pin_config.scl = sclPin;
+    /** And Initialize */
+    displayI2c.Init(disp_cfg);
+
+    m_supportsI2cDisplay = true;
 }
 
 void BaseHardwareModule::InitTrueBypass(Pin relayPin, Pin mutePin) {
