@@ -50,6 +50,7 @@ BaseEffectModule **availableEffects = nullptr;
 int activeEffectID = 0;
 int prevActiveEffectID = 0;
 int tunerModuleIndex = -1;
+int looperModuleIndex = -1;
 BaseEffectModule *activeEffect = nullptr;
 
 // UI Related Variables
@@ -202,7 +203,7 @@ static void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer
 
         // If bypass is held for 2 seconds and alternate footswitch is not
         // pressed (not trying to save) then perform an action
-        if (hardware.switches[hardware.GetPreferredSwitchIDForSpecialFunctionType(SpecialFunctionType::Bypass)].TimeHeldMs() > 2000 &&
+        if (false && hardware.switches[hardware.GetPreferredSwitchIDForSpecialFunctionType(SpecialFunctionType::Bypass)].TimeHeldMs() > 2000 &&
             !hardware.switches[hardware.GetPreferredSwitchIDForSpecialFunctionType(SpecialFunctionType::Alternate)].Pressed() &&
             !ignoreBypassSwitchUntilNextActuation) {
 
@@ -280,6 +281,21 @@ static void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer
         if (effectOn && switchPressed && i == hardware.GetPreferredSwitchIDForSpecialFunctionType(SpecialFunctionType::Alternate)) {
             activeEffect->AlternateFootswitchPressed();
         }
+
+        if (DISPLAY_BUTTON_INDEX == i && switchPressed) {
+            if (activeEffectID != tunerModuleIndex) {
+                // Switch to tuner and force it to be enabled
+                SetActiveEffect(tunerModuleIndex);
+                effectOn = true;
+                activeEffect->SetEnabled(effectOn);
+            } else {
+                SetActiveEffect(looperModuleIndex);
+                effectOn = true;
+                activeEffect->SetEnabled(effectOn);
+            }
+
+        }
+
 
         bool switchReleased = hardware.switches[i].FallingEdge();
         if (effectOn && switchReleased && i == hardware.GetPreferredSwitchIDForSpecialFunctionType(SpecialFunctionType::Alternate)) {
@@ -583,7 +599,12 @@ int main(void) {
             // to/from it
             tunerModuleIndex = i;
         }
+        else if(std::string(availableEffects[i]->GetName()) == std::string("Looper")) {
+            looperModuleIndex = i;
+        }
     }
+
+    SetActiveEffect(looperModuleIndex);
 
     // Initalize Persistance Storage
     InitPersistantStorage();

@@ -5,10 +5,12 @@
 using namespace bkshepherd;
 
 // 60 seconds at 48kHz
-#define kBuffSize 48000 * 60
+// #define kBuffSize 48000 * 60
+// 5 Minutes at 48kHz
+#define kBuffSize 48000 * 60 * 5
 
 float DSY_SDRAM_BSS buffer[kBuffSize];
-float DSY_SDRAM_BSS bufferR[kBuffSize];
+// float DSY_SDRAM_BSS bufferR[kBuffSize];
 
 static const char *s_loopModeNames[4] = {"Normal", "One-time", "Replace", "Fripp"};
 
@@ -102,7 +104,7 @@ void LooperModule::Init(float sample_rate) {
 
     // Init the looper
     m_looper.Init(buffer, kBuffSize);
-    m_looperR.Init(bufferR, kBuffSize);
+    // m_looperR.Init(bufferR, kBuffSize);
 
     SetLooperMode();
     tone.Init(sample_rate);
@@ -113,7 +115,7 @@ void LooperModule::Init(float sample_rate) {
 void LooperModule::SetLooperMode() {
     const int modeIndex = GetParameterAsBinnedValue(2) - 1;
     m_looper.SetMode(static_cast<daisysp::Looper::Mode>(modeIndex));
-    m_looperR.SetMode(static_cast<daisysp::Looper::Mode>(modeIndex));
+    // m_looperR.SetMode(static_cast<daisysp::Looper::Mode>(modeIndex));
 }
 
 void LooperModule::ParameterChanged(int parameter_id) {
@@ -124,30 +126,35 @@ void LooperModule::ParameterChanged(int parameter_id) {
 
 void LooperModule::AlternateFootswitchPressed() {
     m_looper.TrigRecord();
-    m_looperR.TrigRecord();
+    // m_looperR.TrigRecord();
 }
 
 void LooperModule::AlternateFootswitchHeldFor1Second() {
     // clear the loop
     m_looper.Clear();
-    m_looperR.Clear();
+    // m_looperR.Clear();
 }
 
 void LooperModule::ProcessMono(float in) {
     BaseEffectModule::ProcessMono(in);
 
-    const float inputLevel = m_inputLevelMin + (GetParameterAsFloat(0) * (m_inputLevelMax - m_inputLevelMin));
+    // const float inputLevel = m_inputLevelMin + (GetParameterAsFloat(0) * (m_inputLevelMax - m_inputLevelMin));
+    const float inputLevel = 0.5f; // Hard code since no knobs
 
-    const float loopLevel = m_loopLevelMin + (GetParameterAsFloat(1) * (m_loopLevelMax - m_loopLevelMin));
+    // const float loopLevel = m_loopLevelMin + (GetParameterAsFloat(1) * (m_loopLevelMax - m_loopLevelMin));
+    const float loopLevel = 0.5f; // Hard code since no knobs
 
     float input = in * inputLevel;
 
     // Set low pass filter as exponential taper
-    tone.SetFreq(m_toneFreqMin + GetParameterAsFloat(5) * GetParameterAsFloat(5) * (m_toneFreqMax - m_toneFreqMin));
+    // tone.SetFreq(m_toneFreqMin + GetParameterAsFloat(5) * GetParameterAsFloat(5) * (m_toneFreqMax - m_toneFreqMin));
+    // Force default since no knobs
+    tone.SetFreq(1.0f);
 
     // Handle speed and direction changes smoothly (like a tape reel)
     // TODO maybe move out to only do this when speed param changes
-    int speedModeIndex = GetParameterAsBinnedValue(3) - 1;
+    // int speedModeIndex = GetParameterAsBinnedValue(3) - 1;
+    int speedModeIndex = 0; // Force default since no knobs
 
     if (speedModeIndex == 2) {
         float speed = GetParameterAsFloat(4);
@@ -221,14 +228,14 @@ void LooperModule::ProcessStereo(float inL, float inR) {
         daisysp::fonepole(currentSpeed, speed, .00006f);
         if (currentSpeed < 0.0) {
             m_looper.SetReverse(true);
-            m_looperR.SetReverse(true);
+            // m_looperR.SetReverse(true);
         } else {
             m_looper.SetReverse(false);
-            m_looperR.SetReverse(false);
+            // m_looperR.SetReverse(false);
         }
         float speed_input_abs = abs(currentSpeed);
         m_looper.SetIncrementSize(speed_input_abs);
-        m_looperR.SetIncrementSize(speed_input_abs);
+        // m_looperR.SetIncrementSize(speed_input_abs);
 
     } else if (speedModeIndex == 1) {
         float speed = GetParameterAsFloat(4) * 2;
@@ -238,23 +245,23 @@ void LooperModule::ProcessStereo(float inL, float inR) {
 
         if (speed < 0.0) {
             m_looper.SetReverse(true);
-            m_looperR.SetReverse(true);
+            // m_looperR.SetReverse(true);
         } else {
             m_looper.SetReverse(false);
-            m_looperR.SetReverse(false);
+            // m_looperR.SetReverse(false);
         }
         float speed_input_abs = abs(stepped_speed);
         if (speed_input_abs < 0.5) {
             speed_input_abs = 0.5;
         }
         m_looper.SetIncrementSize(speed_input_abs);
-        m_looperR.SetIncrementSize(speed_input_abs);
+        // m_looperR.SetIncrementSize(speed_input_abs);
 
     } else {
         m_looper.SetReverse(false);
         m_looper.SetIncrementSize(1.0);
-        m_looperR.SetReverse(false);
-        m_looperR.SetIncrementSize(1.0);
+        // m_looperR.SetReverse(false);
+        // m_looperR.SetIncrementSize(1.0);
     }
     /////////////////////////
 
@@ -262,11 +269,11 @@ void LooperModule::ProcessStereo(float inL, float inR) {
     float looperOutput = m_looper.Process(input) * loopLevel + input;
     float filter_out = tone.Process(looperOutput); // Apply tone Low Pass filter (useful to tame aliasing noise on variable speeds)
 
-    float looperOutputR = m_looperR.Process(inputR) * loopLevel + inputR;
-    float filter_outR = toneR.Process(looperOutputR); // Apply tone Low Pass filter (useful to tame aliasing noise on variable speeds)
+    // float looperOutputR = m_looperR.Process(inputR) * loopLevel + inputR;
+    // float filter_outR = toneR.Process(looperOutputR); // Apply tone Low Pass filter (useful to tame aliasing noise on variable speeds)
 
     m_audioLeft = filter_out;
-    m_audioRight = filter_outR;
+    // m_audioRight = filter_outR;
 }
 
 float LooperModule::GetBrightnessForLED(int led_id) const {

@@ -2,6 +2,8 @@
 #ifndef GUITAR_PEDAL_INTERNAL_H
 #define GUITAR_PEDAL_INTERNAL_H /**< & */
 
+#define DISPLAY_BUTTON_INDEX  2
+
 #include "base_hardware_module.h"
 
 #ifdef __cplusplus

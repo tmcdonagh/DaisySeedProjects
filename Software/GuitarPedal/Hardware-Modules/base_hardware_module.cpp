@@ -229,6 +229,7 @@ void BaseHardwareModule::InitI2cDisplay(Pin sdaPin, Pin sclPin) {
     disp_cfg.driver_config.transport_config.i2c_address               = 0x3C;
     disp_cfg.driver_config.transport_config.i2c_config.periph         = I2CHandle::Config::Peripheral::I2C_1;
     // disp_cfg.driver_config.transport_config.i2c_config.speed          = I2CHandle::Config::Speed::I2C_100KHZ;
+    disp_cfg.driver_config.transport_config.i2c_config.speed          = I2CHandle::Config::Speed::I2C_1MHZ;
     disp_cfg.driver_config.transport_config.i2c_config.mode           = I2CHandle::Config::Mode::I2C_MASTER;
     disp_cfg.driver_config.transport_config.i2c_config.pin_config.sda = sdaPin;
     disp_cfg.driver_config.transport_config.i2c_config.pin_config.scl = sclPin;
