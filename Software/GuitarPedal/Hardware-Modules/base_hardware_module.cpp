@@ -237,6 +237,7 @@ void BaseHardwareModule::InitI2cDisplay(Pin sdaPin, Pin sclPin) {
     displayI2c.Init(disp_cfg);
 
     m_supportsI2cDisplay = true;
+    m_supportsDisplay = true;
 }
 
 void BaseHardwareModule::InitTrueBypass(Pin relayPin, Pin mutePin) {
